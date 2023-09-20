@@ -1,0 +1,58 @@
+EOI EQU 20H
+IMR EQU 21H
+INT2 EQU 26H
+COMP EQU 11H
+CONT EQU 10H
+
+DATO EQU 40H
+ESTADO EQU 41H
+
+org 1000h
+   msj1 db ?
+   msj2 db ?
+   msj3 db ?
+   msj4 db ?
+   msj5 db ?
+org 2000h
+  mov ax, imprimir
+  mov bx, 20
+  mov [bx], ax
+  cli
+    mov al, 11111011b
+    out IMR,al
+    mov al, 5
+    out INT2, al
+  sti
+
+  mov dl, 5
+  mov bx, offset msj1
+  loop: int 6
+    inc bx
+    dec dl
+    jnz loop
+  mov bx, offset msj1
+
+  in al, ESTADO
+  or al, 10000000b
+  out ESTADO,al
+
+  in al, ESTADO
+  and al, 10000000b
+  out ESTADO,al
+  
+  
+int 0
+org 3000h
+  imprimir: push ax
+    mov al, [bx]
+    out DATO,al
+    inc bx
+    cmp bx, 1005h
+    jnz salto
+    mov al, 11111111b
+    out IMR,al
+    salto:mov al, EOI
+    out EOI,al
+    pop ax
+    iret
+end
