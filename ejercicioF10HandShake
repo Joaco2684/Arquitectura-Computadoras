@@ -1,0 +1,72 @@
+//SE leen 5 nros desde teclado y al apretar la tecla F10. se imprimen en la impresora utilizando el HandShake por Consulta de Estado
+EOI EQU 20H
+IMR EQU 21H
+INT0 EQU 24h
+INT2 EQU 26H
+COMP EQU 11H
+CONT EQU 10H
+
+DATO EQU 40H
+ESTADO EQU 41H
+
+org 1000h
+   msj1 db ?
+   msj2 db ?
+   msj3 db ?
+   msj4 db ?
+   msj5 db ?
+   fin db ?
+org 2000h
+  mov ax, f10
+  mov bx, 32; id 8
+  mov [bx], ax
+  mov ax, imprimir
+  mov bx, 36; id 9
+  mov [bx], ax
+  cli
+    mov al, 11111110b
+    out IMR, al
+    mov al, 8
+    out INT0, al
+    mov al, 9
+    out INT2, al
+    
+  sti
+
+  mov bx, offset msj1
+  loop: int 6
+    inc bx
+    cmp bx, offset fin
+    jnz loop
+
+  mov bx, offset msj1
+
+  in al, ESTADO
+  or al, 10000000b
+  out ESTADO,al
+
+  loopp: jmp loopp;
+  
+int 0
+org 3000h
+  imprimir: push ax
+    mov al, [bx]
+    out DATO, al
+    inc bx
+    cmp bx, offset fin
+    jnz finn
+      mov al, 11111111b
+      out IMR,al
+    finn:mov al, EOI
+    out EOI,al
+    pop ax
+    iret
+
+  f10: push ax
+    mov al, 11111011b
+    out IMR,al
+    mov al, EOI
+    out EOI,al
+    pop ax
+    iret
+end
