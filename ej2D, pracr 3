@@ -1,0 +1,71 @@
+// Escribir un programa que solicite ingresar caracteres por teclado y que recién al presionar la tecla F10
+los envíe a la impresora a través de la PIO. No es necesario mostrar los caracteres en la pantalla
+
+EOI EQU 20H
+IMR EQU 21H
+INT0 EQU 24h
+INT2 EQU 26H
+COMP EQU 11H
+CONT EQU 10H
+
+DATO EQU 40H
+ESTADO EQU 41H
+
+PA EQU 30H
+PB EQU 31H
+CA EQU 32H
+CB EQU 33H
+
+org 1000h
+   char db ?
+org 2000h
+
+  mov al, 11111101b
+  out CA,al
+  mov al, 0
+  out CB,al
+  mov ax, f10
+  mov bx, 20
+  mov[bx], ax
+  cli
+    mov al, 11111110b
+    out IMR,al
+    mov al, 5
+    out INT0, al
+  sti
+
+  mov bx, offset char
+  mov dh,0 ;flag
+  mov dl, 0 ; cont
+  leer: int 6
+    inc bx
+    inc dl
+    cmp dh,1
+    jnz leer
+
+  
+    
+int 0
+org 3000h
+  f10: push ax
+    mov dh,1 ;ACTIVO FLAG, DEJA DE LEER
+    mov bx, offset char
+    poll: in al, PA
+      and al, 1
+      jnz poll
+    mov al, [bx]
+    out PB, al
+    in al, PA
+    or al, 2
+    out PA,al
+    and al, 0FDh
+    out PA,al
+    inc bx
+    dec dl
+    cmp dl, 0
+    jnz poll
+    mov al, EOI
+    out EOI,al
+    pop ax
+    iret
+end
