@@ -1,0 +1,40 @@
+Escribir un programa que imprime “INGENIERIA E INFORMATICA” en la impresora a través del
+HAND-SHAKE. La comunicación se establece por consulta de estado (polling).
+
+EOI EQU 20H
+IMR EQU 21H
+INT0 EQU 24h
+INT2 EQU 26H
+COMP EQU 11H
+CONT EQU 10H
+
+DATO EQU 40H
+ESTADO EQU 41H
+
+PA EQU 30H
+PB EQU 31H
+CA EQU 32H
+CB EQU 33H
+
+org 1000h
+  pal db "UNIVERSIDAD NACIONAL DE LA PLATA"
+  fin db ?
+org 2000h
+  mov bx, offset pal
+  in al, ESTADO
+  and al, 01111111b
+  out ESTADO,al
+  poll: in al, ESTADO
+    and al, 00000001b
+    jnz poll
+  mov al, [bx]
+  out DATO,al
+  inc bx
+  cmp bx, offset fin
+  jnz poll
+
+  loop: jmp loop;
+  
+int 0
+org 3000h
+end
