@@ -1,0 +1,53 @@
+//Escribir un programa que imprime “UNIVERSIDAD NACIONAL DE LA PLATA” en la impresora a
+través del HAND-SHAKE. La comunicación se establece por interrupciones emitidas desde el
+HAND-SHAKE cada vez que la impresora se desocupa.
+
+EOI EQU 20H
+IMR EQU 21H
+INT0 EQU 24h
+INT2 EQU 26H
+COMP EQU 11H
+CONT EQU 10H
+
+DATO EQU 40H
+ESTADO EQU 41H
+
+PA EQU 30H
+PB EQU 31H
+CA EQU 32H
+CB EQU 33H
+
+org 1000h
+  pal db "UNIVERSIDAD NACIONAL DE LA PLATA"
+  fin db ?
+org 2000h
+  mov ax, imprimir
+  mov bx, 20
+  mov [bx], ax
+  mov bx, offset pal
+  cli
+    mov al, 0FBh
+    out IMR,al
+    mov al, 5
+    out INT2,al
+    in al, ESTADO
+    or al, 10000000b
+    out ESTADO,al
+  sti
+  loop: jmp loop;
+      
+int 0
+org 3000h
+  imprimir: push ax
+    mov al, [bx]
+    out DATO,al
+    inc bx
+    cmp bx, offset fin
+    jnz salta
+    mov al, 0FFh
+    out IMR,al
+    salta: mov al, EOI
+    out EOI,al
+    pop ax
+    iret
+end
