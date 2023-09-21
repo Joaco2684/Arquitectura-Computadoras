@@ -21,26 +21,26 @@ org 1000h
 org 2000h
 
   mov al, 11111101b
-  out CA,al
+  out CA,al; Configuracion inicial CA
   mov al, 0
-  out CB,al
+  out CB,al ;COnfiguro CB de salida
   mov ax, f10
   mov bx, 20
-  mov[bx], ax
+  mov[bx], ax ;Agrego al vector la dir de interrupcion f10
   cli
     mov al, 11111110b
-    out IMR,al
+    out IMR,al ;COnfiguro IMR para utilizar f10
     mov al, 5
-    out INT0, al
+    out INT0, al ;ID de interrupcion
   sti
 
   mov bx, offset char
   mov dh,0 ;flag
-  mov dl, 0 ; cont
+  mov dl, 0 ; contador de carcateres leidos
   leer: int 6
     inc bx
     inc dl
-    cmp dh,1
+    cmp dh,1 ;Leo hasta que se presione f10(flag = 1)
     jnz leer
 
   
@@ -54,15 +54,15 @@ org 3000h
       and al, 1
       jnz poll
     mov al, [bx]
-    out PB, al
+    out PB, al ;Mnado el cracater a la impresora
     in al, PA
-    or al, 2
+    or al, 2 ;Bit de strobe a 1
     out PA,al
-    and al, 0FDh
+    and al, 0FDh ;Bit de strobe a 0
     out PA,al
     inc bx
     dec dl
-    cmp dl, 0
+    cmp dl, 0 ;Chequeo si imprimi todos los caracteres
     jnz poll
     mov al, EOI
     out EOI,al
